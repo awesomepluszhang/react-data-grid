@@ -1,11 +1,17 @@
 import './App.css';
 import DataGrid from './components/DataGrid';
 
+interface Person {
+  id: number;
+  name: string;
+  age: number;
+}
+
 function App() {
   return (
     <div className="App">
       <h1>Data Grid Example</h1>
-      <DataGrid
+      <DataGrid<Person>
         data={[
           { id: 1, name: 'John Doe', age: 30 },
           { id: 2, name: 'Jane Smith', age: 25 },

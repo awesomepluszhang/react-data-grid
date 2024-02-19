@@ -1,21 +1,33 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import { orderBy } from 'lodash';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 
-interface DataGridProps {
-  data: any[];
-  columns: { key: string; header: string }[];
+interface Column<T> {
+  key: keyof T;
+  header: string;
+}
+
+interface DataGridProps<T> {
+  data: T[];
+  columns: Column<T>[];
   pageSize: number;
 }
 
-const DataGrid: React.FC<DataGridProps> = ({ data, columns, pageSize }) => {
+const DataGrid = <T extends Record<string, any>>({ data, columns, pageSize }: DataGridProps<T>) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredData, setFilteredData] = useState<any[]>(data);
-  const [sortedColumn, setSortedColumn] = useState('');
+  const [filteredData, setFilteredData] = useState<T[]>(data);
+  const [sortedColumn, setSortedColumn] = useState<keyof T>(columns[0].key);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
+  useEffect(() => {
+    setFilteredData(orderBy(filteredData, [sortedColumn], [sortOrder]))
+  }, [])
+
   const handleSort = useCallback((key: string) => {
+    const order = sortOrder === 'asc' ? 'desc' : 'asc';
     setSortedColumn(key);
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-  }, [sortOrder])
+    setSortOrder(order);
+    setFilteredData(orderBy(filteredData, [key], [order]))
+  }, [filteredData, sortOrder])
 
   const handleFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
@@ -31,12 +43,12 @@ const DataGrid: React.FC<DataGridProps> = ({ data, columns, pageSize }) => {
   return (
     <div className='data-grid-container'>
       <input type="text" placeholder="Search..." onChange={handleFilter} />
-      <p>Sorted Column: {sortedColumn} {sortOrder}</p>
+      <p>Sorted Column: {sortedColumn as string}</p>
       <table>
         <thead>
           <tr>
             {columns.map(col => (
-              <th key={col.key} onClick={() => handleSort(col.key)}>
+              <th key={col.key as string} onClick={() => handleSort(col.key as string)}>
                 {col.header}
               </th>
             ))}
@@ -46,7 +58,7 @@ const DataGrid: React.FC<DataGridProps> = ({ data, columns, pageSize }) => {
           {paginatedData.map((row, index) => (
             <tr key={index}>
               {columns.map(col => (
-                <td key={col.key}>{row[col.key]}</td>
+                <td key={col.key as string}>{row[col.key]}</td>
               ))}
             </tr>
           ))}

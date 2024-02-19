@@ -1,5 +1,6 @@
-import { orderBy } from 'lodash';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { orderBy } from 'lodash';
+import styled from 'styled-components';
 
 interface Column<T> {
   key: keyof T;
@@ -11,6 +12,10 @@ interface DataGridProps<T> {
   columns: Column<T>[];
   pageSize: number;
 }
+
+const DataGridContent = styled.table`
+  margin: auto;
+`;
 
 const DataGrid = <T extends Record<string, any>>({ data, columns, pageSize }: DataGridProps<T>) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,10 +46,10 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, pageSize }: Da
   const paginatedData = useMemo(() => filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize), [currentPage, filteredData, pageSize]);
 
   return (
-    <div className='data-grid-container'>
+    <>
       <input type="text" placeholder="Search..." onChange={handleFilter} />
       <p>Sorted Column: {sortedColumn as string}</p>
-      <table>
+      <DataGridContent>
         <thead>
           <tr>
             {columns.map(col => (
@@ -63,15 +68,15 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, pageSize }: Da
             </tr>
           ))}
         </tbody>
-      </table>
-      <div>
+      </DataGridContent>
+      <>
         {Array.from(Array(totalPages).keys()).map(pageNum => (
           <button key={pageNum} onClick={() => setCurrentPage(pageNum + 1)}>
             {pageNum + 1}
           </button>
         ))}
-      </div>
-    </div>
+      </>
+    </>
   );
 };
 

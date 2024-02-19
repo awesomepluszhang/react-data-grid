@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { VariableSizeGrid } from 'react-window';
 import styled from 'styled-components';
 
@@ -21,6 +21,7 @@ const StyledVariableSizeGrid = styled(VariableSizeGrid)`
 
 const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 20, pageSize }: DataGridProps<T>) => {
   const [filteredData, setFilteredData] = useState<T[]>(data);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const handleFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
@@ -29,6 +30,16 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 2
     );
     setFilteredData(filtered);
   }, [data])
+
+  const totalRows = useMemo(() => filteredData.length, [filteredData.length]);
+  const totalPages = useMemo(() =>  Math.ceil(totalRows / pageSize), [pageSize, totalRows]);
+  const nextPage = useCallback(() => {
+    setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages - 1));
+  }, [totalPages]);
+
+  const prevPage = useCallback(() => {
+    setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
+  }, []);
 
   const cellRenderer = ({ columnIndex, rowIndex, style }: { columnIndex: number, rowIndex: number, style: React.CSSProperties }) => {
     const item = filteredData[rowIndex];
@@ -53,6 +64,11 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 2
       >
         {cellRenderer}
       </StyledVariableSizeGrid>
+      <div>
+        <button onClick={prevPage} disabled={currentPage === 0}>Previous</button>
+        <span>Page {currentPage + 1} of {totalPages}</span>
+        <button onClick={nextPage} disabled={currentPage === totalPages - 1}>Next</button>
+      </div>
     </div>
   );
 };

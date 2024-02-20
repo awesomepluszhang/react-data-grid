@@ -3,17 +3,18 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { VariableSizeGrid } from 'react-window';
 import styled from 'styled-components';
 
+const DEFAULT_ROW_HEIGHT = 20;
 interface Column<T> {
   key: keyof T;
   header: string;
-  width?: number;
+  width: number;
 }
 
 interface DataGridProps<T> {
   data: T[];
   columns: Column<T>[];
-  itemHeight?: number;
   pageSize: number;
+  height: number;
 }
 
 type Direction = 'asc' | 'desc';
@@ -22,7 +23,7 @@ const StyledVariableSizeGrid = styled(VariableSizeGrid)`
   margin: auto;
 `;
 
-const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 20, pageSize }: DataGridProps<T>) => {
+export const DataGrid = <T extends Record<string, any>>({ data, columns, pageSize }: DataGridProps<T>) => {
   const [filteredData, setFilteredData] = useState<T[]>(data);
   const [currentPage, setCurrentPage] = useState(0);
   const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: Direction } | null>(null);
@@ -78,11 +79,11 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 2
       </div>
       <StyledVariableSizeGrid
         columnCount={columns.length}
-        columnWidth={(index: number) => columns[index].width ?? 100}
+        columnWidth={(index: number) => columns[index].width}
         rowCount={filteredData.length}
-        rowHeight={(index: number) => itemHeight}
+        rowHeight={(index: number) => DEFAULT_ROW_HEIGHT}
         width={columns.reduce((sum, col) => sum + (col.width ?? 100), 0)}
-        height={pageSize * itemHeight}
+        height={300}
       >
         {cellRenderer}
       </StyledVariableSizeGrid>
@@ -94,5 +95,3 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 2
     </div>
   );
 };
-
-export default DataGrid;

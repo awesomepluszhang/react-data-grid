@@ -3,7 +3,6 @@ import { DataGrid } from './components';
 import { User, loadUsers } from './services';
 
 function App() {
-  console.log(loadUsers(3), 'afeuhf ');
   return (
     <div className="App">
       <h1>Data Grid Example</h1>

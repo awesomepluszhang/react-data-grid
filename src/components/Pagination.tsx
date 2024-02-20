@@ -1,13 +1,12 @@
-import { memo, forwardRef, HTMLAttributes, useCallback } from 'react';
+import { memo, forwardRef, HTMLAttributes, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDualModeState } from '../hooks';
-import { Inline } from './Inline';
 import { calcRanges } from '../utils';
 import { last } from 'lodash';
 
 export type PaginationBaseProps = Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> & {
   total: number;
-  page?: number;
+  page: number;
   defaultPage?: number;
   onChange?: (page: number) => void;
   disabled?: boolean;
@@ -49,6 +48,18 @@ const StepItem = styled.span<{ active: boolean }>`
   cursor: pointer;
 `;
 
+const Inline = styled.div`
+  display: inline-flex;
+  flex-direction: row;
+  padding: 0;
+  > * {
+    flex-grow: 0;
+  }
+  > * + * {
+    margin-left: 0.5rem;
+  }
+`;
+
 export const Pagination = memo(
   forwardRef<HTMLDivElement, PaginationBaseProps>((props, ref) => {
     const {
@@ -86,37 +97,16 @@ export const Pagination = memo(
       [setInternalPage, onChange]
     );
 
-    const defaultRenderPaginationItems = useCallback(
-      ({ page, total, goto }: { page: number; total: number; goto: (page: number) => void }) => {
-        const ranges = calcRanges({
+    const ranges = useMemo(
+      () =>
+        calcRanges({
           active: page,
           total,
           startBoundaryCount,
           endBoundaryCount,
           siblingCount
-        });
-
-        return (
-          <Inline gap="0.5rem">
-            {ranges.slice(0, -1).map((range, index) => (
-              <Inline key={index}>
-                {range.map(num => (
-                  <StepItem key={num} onClick={() => goto(num)} active={num === page}>
-                    {num}
-                  </StepItem>
-                ))}
-                <StepItem active={false}>...</StepItem>
-              </Inline>
-            ))}
-            {last(ranges)?.map(num => (
-              <StepItem key={num} onClick={() => goto(num)} active={num === page}>
-                {num}
-              </StepItem>
-            ))}
-          </Inline>
-        );
-      },
-      [siblingCount, startBoundaryCount, endBoundaryCount]
+        }),
+      [endBoundaryCount, page, siblingCount, startBoundaryCount, total]
     );
 
     return (
@@ -130,7 +120,23 @@ export const Pagination = memo(
         >
           <path d="M7 1L1 7L7 13" />
         </PageControlSvg>
-        {defaultRenderPaginationItems({ page: finalPage, total, goto })}
+        <Inline>
+          {ranges.slice(0, -1).map((range, index) => (
+            <Inline key={index}>
+              {range.map(num => (
+                <StepItem key={num} onClick={() => goto(num)} active={num === page}>
+                  {num}
+                </StepItem>
+              ))}
+              <StepItem active={false}>...</StepItem>
+            </Inline>
+          ))}
+          {last(ranges)?.map(num => (
+            <StepItem key={num} onClick={() => goto(num)} active={num === page}>
+              {num}
+            </StepItem>
+          ))}
+        </Inline>
         <PageControlSvg
           data-control-type="next_page"
           onClick={handleNext}

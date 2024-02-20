@@ -1,7 +1,8 @@
 import { orderBy } from 'lodash';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, memo, useRef } from 'react';
 import { VariableSizeGrid } from 'react-window';
 import styled from 'styled-components';
+import { Pagination } from './Pagination';
 
 const DEFAULT_ROW_HEIGHT = 20;
 interface Column<T> {
@@ -23,10 +24,27 @@ const StyledVariableSizeGrid = styled(VariableSizeGrid)`
   margin: auto;
 `;
 
-export const DataGrid = <T extends Record<string, any>>({ data, columns, pageSize }: DataGridProps<T>) => {
+const HeaderContainer = styled.div`
+  margin-top: 1em;
+`;
+
+const HeaderItem = styled.span`
+  display: inline-block;
+  background: rgb(244, 244, 244);
+  padding: 1em 0;
+`;
+
+const StyledPagination = styled(Pagination)`
+  margin: 1em;
+`;
+
+export const genericMemo: <C>(c: C) => C = memo;
+
+export const DataGrid = genericMemo(<T extends Record<string, any>>({ data, columns, height, pageSize }: DataGridProps<T>) => {
   const [filteredData, setFilteredData] = useState<T[]>(data);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: Direction } | null>(null);
+  const gridRef = useRef<VariableSizeGrid>(null);
 
   const handleFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
@@ -49,13 +67,10 @@ export const DataGrid = <T extends Record<string, any>>({ data, columns, pageSiz
 
   const totalRows = useMemo(() => filteredData.length, [filteredData.length]);
   const totalPages = useMemo(() =>  Math.ceil(totalRows / pageSize), [pageSize, totalRows]);
-  const nextPage = useCallback(() => {
-    setCurrentPage(prevPage => Math.min(prevPage + 1, totalPages - 1));
-  }, [totalPages]);
-
-  const prevPage = useCallback(() => {
-    setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
-  }, []);
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    gridRef.current?.scrollToItem({ align: 'start', rowIndex: (page - 1) * pageSize });
+  }, [pageSize]);
 
   const cellRenderer = ({ columnIndex, rowIndex, style }: { columnIndex: number, rowIndex: number, style: React.CSSProperties }) => {
     const item = filteredData[rowIndex];
@@ -70,14 +85,15 @@ export const DataGrid = <T extends Record<string, any>>({ data, columns, pageSiz
   return (
     <div>
       <input type="text" placeholder="Search..." onChange={handleFilter} />
-      <div>
+      <HeaderContainer>
         {columns.map(col => (
-          <span key={col.key as string} onClick={() => handleSort(col.key)}>
+          <HeaderItem key={col.key as string} onClick={() => handleSort(col.key)} style={{ width: col.width }}>
             {col.header} {sortConfig && sortConfig.key === col.key && (sortConfig.direction === 'asc' ? '▲' : '▼')}
-          </span>
+          </HeaderItem>
         ))}
-      </div>
+      </HeaderContainer>
       <StyledVariableSizeGrid
+        ref={gridRef}
         columnCount={columns.length}
         columnWidth={(index: number) => columns[index].width}
         rowCount={filteredData.length}
@@ -87,11 +103,13 @@ export const DataGrid = <T extends Record<string, any>>({ data, columns, pageSiz
       >
         {cellRenderer}
       </StyledVariableSizeGrid>
-      <div>
-        <button onClick={prevPage} disabled={currentPage === 0}>Previous</button>
-        <span>Page {currentPage + 1} of {totalPages}</span>
-        <button onClick={nextPage} disabled={currentPage === totalPages - 1}>Next</button>
-      </div>
+      <StyledPagination
+        total={totalPages}
+        page={currentPage}
+        onChange={handlePageChange}
+        siblingCount={0}
+        startBoundaryCount={3}
+      />
     </div>
   );
-};
+});

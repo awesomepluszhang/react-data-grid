@@ -1,8 +1,9 @@
 import { orderBy } from 'lodash';
 import React, { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
-import { VariableSizeGrid } from 'react-window';
+import { VariableSizeGrid, areEqual } from 'react-window';
 import styled from 'styled-components';
 import { Pagination } from './Pagination';
+import memoize from 'memoize-one';
 
 const DEFAULT_ROW_HEIGHT = 20;
 const DEFAULT_CONTAINER_HEIGHT = 300;
@@ -21,6 +22,8 @@ interface DataGridProps<T> {
   rowHeight?: number;
   height?: number;
 }
+
+export const genericMemo: <C>(c: C) => C = memo;
 
 type Direction = 'asc' | 'desc';
 
@@ -42,7 +45,27 @@ const StyledPagination = styled(Pagination)`
   margin: 1em;
 `;
 
-export const genericMemo: <C>(c: C) => C = memo;
+const createDataGridContext = memoize((items, columns) => ({
+  items,
+  columns,
+}));
+
+const DataGridCell = memo(({
+  data,
+  columnIndex,
+  rowIndex,
+  style
+}: {
+  data: any;
+  columnIndex: number;
+  rowIndex: number;
+  style: React.CSSProperties;
+}) => {
+  const { items, columns } = data;
+  const item = items[rowIndex];
+  const column = columns[columnIndex];
+  return <div style={style}>{item[column.key]}</div>;
+}, areEqual);
 
 export const DataGrid = genericMemo(
   <T extends Record<string, any>>({
@@ -104,20 +127,6 @@ export const DataGrid = genericMemo(
       [pageSize]
     );
 
-    const cellRenderer = ({
-      columnIndex,
-      rowIndex,
-      style
-    }: {
-      columnIndex: number;
-      rowIndex: number;
-      style: React.CSSProperties;
-    }) => {
-      const item = filteredData[rowIndex];
-      const column = columns[columnIndex];
-      return <div style={style}>{item[column.key]}</div>;
-    };
-
     return (
       <div>
         <input type="text" placeholder="Search..." onChange={handleFilter} />
@@ -137,6 +146,7 @@ export const DataGrid = genericMemo(
         </HeaderContainer>
         <StyledVariableSizeGrid
           ref={gridRef}
+          itemData={createDataGridContext(filteredData, columns)}
           columnCount={columns.length}
           columnWidth={(index: number) => columns[index].width ?? DEFAULT_COLUMN_WIDTH}
           rowCount={filteredData.length}
@@ -144,7 +154,7 @@ export const DataGrid = genericMemo(
           width={columns.reduce((sum, col) => sum + (col.width ?? DEFAULT_COLUMN_WIDTH), 0)}
           height={height}
         >
-          {cellRenderer}
+          {DataGridCell}
         </StyledVariableSizeGrid>
         <StyledPagination
           total={totalPages}

@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# Data Grid
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -7,40 +7,63 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 In the project directory, you can run:
 
 ### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Runs the app in the development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ### `npm test`
-
 Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
 ### `npm run build`
-
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### How to use
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### Step 1: Import DataGrid  
 
-### `npm run eject`
+First, import the DataGrid component into your project.  
+`import DataGrid from './components/DataGrid';`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+#### Step 2: Provide Data and Columns  
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Pass the data and column configuration to the DataGrid component as props.  
+```
+const columns = [
+  { key: 'id', header: 'ID', width: 100 },
+  { key: 'name', header: 'Name', width: 200 },
+  { key: 'age', header: 'Age', width: 100 },
+  // Add more columns as needed
+];
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+const data = [
+  { id: 1, name: 'John', age: 30 },
+  { id: 2, name: 'Alice', age: 25 },
+  { id: 3, name: 'Bob', age: 35 },
+  // Add more data as needed
+];
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+#### Step 3: Render the DataGrid  
+Render the DataGrid component with the provided data and columns.  
+```
+<DataGrid
+  data={data}
+  columns={columns}
+  itemHeight={30} // Adjust item height as needed
+  pageSize={10}   // Adjust page size as needed
+/>
+```
+### Supported Features
+#### 1. Searching:  
 
-## Learn More
+To search, type text into the search input box. The data grid will filter the rows based on the input value.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+#### 2. Sorting:  
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+To sort, click on the column header. The data grid will sort the rows based on the selected column. Clicking again will toggle between ascending and descending order.
+
+#### 3. Virtual Scrolling: 
+
+Virtual scrolling is enabled by default. The data grid efficiently renders only the rows that are visible in the viewport, improving performance for large datasets. 
+
+Scroll up and down to see the rows being rendered dynamically as you scroll through the data.
+That's it! You've successfully integrated and used the DataGrid component in your project, allowing for searching, sorting, and efficient virtual scrolling.  

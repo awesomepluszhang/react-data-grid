@@ -1,5 +1,5 @@
 import { orderBy } from 'lodash';
-import React, { useState, useCallback, useMemo, memo, useRef } from 'react';
+import React, { useState, useCallback, useMemo, memo, useRef, useEffect } from 'react';
 import { VariableSizeGrid } from 'react-window';
 import styled from 'styled-components';
 import { Pagination } from './Pagination';
@@ -52,12 +52,16 @@ export const DataGrid = genericMemo(
     rowHeight = DEFAULT_ROW_HEIGHT,
     height = DEFAULT_CONTAINER_HEIGHT
   }: DataGridProps<T>) => {
-    const [filteredData, setFilteredData] = useState<T[]>(data);
+    const [filteredData, setFilteredData] = useState<T[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: Direction } | null>(
       null
     );
     const gridRef = useRef<VariableSizeGrid>(null);
+
+    useEffect(() => {
+      setFilteredData(data)
+    }, [data])
 
     const handleFilter = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {

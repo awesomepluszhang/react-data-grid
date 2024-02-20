@@ -37,14 +37,14 @@ const PageControlSvg = styled.svg<{ disabled: boolean }>`
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
 `;
 
-const StepItem = styled.span<{ active: boolean }>`
+const StepItem = styled.span<{ $active: boolean }>`
   padding: 0.8rem 1em;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: ${({ active }) => (active ? '#2F2F2F' : 'transparent')};
-  color: ${({ active }) => (active ? '#FFF8E7' : 'inherit')};
+  background-color: ${({ $active }) => ($active ? '#2F2F2F' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#FFF8E7' : 'inherit')};
   cursor: pointer;
 `;
 
@@ -124,15 +124,15 @@ export const Pagination = memo(
           {ranges.slice(0, -1).map((range, index) => (
             <Inline key={index}>
               {range.map(num => (
-                <StepItem key={num} onClick={() => goto(num)} active={num === page}>
+                <StepItem key={num} onClick={() => goto(num)} $active={num === page}>
                   {num}
                 </StepItem>
               ))}
-              <StepItem active={false}>...</StepItem>
+              <StepItem $active={false}>...</StepItem>
             </Inline>
           ))}
           {last(ranges)?.map(num => (
-            <StepItem key={num} onClick={() => goto(num)} active={num === page}>
+            <StepItem key={num} onClick={() => goto(num)} $active={num === page}>
               {num}
             </StepItem>
           ))}

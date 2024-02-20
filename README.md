@@ -21,47 +21,58 @@ It correctly bundles React in production mode and optimizes the build for the be
 #### Step 1: Import DataGrid  
 
 First, import the DataGrid component into your project.  
-`import DataGrid from './components/DataGrid';`
+`import { DataGrid } from './components';`
 
 #### Step 2: Provide Data and Columns  
 
 Pass the data and column configuration to the DataGrid component as props.  
 ```
+
 const columns = [
-  { key: 'id', header: 'ID', width: 100 },
-  { key: 'name', header: 'Name', width: 200 },
-  { key: 'age', header: 'Age', width: 100 },
-  // Add more columns as needed
+    { key: 'userId', header: 'User Id', width: 100}, 
+    { key: 'username', header: 'Username', width: 300}, 
+    { key: 'email', header: 'Email', width: 300},
+    { key: 'sex', header: 'Sex', width: 100 }
+    // Add more columns as needed
 ];
 
 const data = [
-  { id: 1, name: 'John', age: 30 },
-  { id: 2, name: 'Alice', age: 25 },
-  { id: 3, name: 'Bob', age: 35 },
-  // Add more data as needed
+    { userId: 'ada2a8c4', username: 'Carroll.Collier', email: 'Jerel57@gmail.com', sex: 'female' },
+    { userId: 'a093ddf6', username: 'Sonny_Kessler31', email: 'Kaya.Hegmann26@yahoo.com', sex: 'female' },
+    { userId: 'b7254ef0', username: 'Lula.Upton', email: 'Irwin.Jacobs93@hotmail.com', sex: 'female' },
+    // Add more data as needed
 ];
 ```
 
 #### Step 3: Render the DataGrid  
 Render the DataGrid component with the provided data and columns.  
 ```
-<DataGrid
-  data={data}
-  columns={columns}
-  itemHeight={30} // Adjust item height as needed
-  pageSize={10}   // Adjust page size as needed
+<DataGrid<User>
+    data={loadUsers(100000)}
+    columns={[
+        { key: 'userId', header: 'User Id', width: 100}, 
+        { key: 'username', header: 'Username', width: 300}, 
+        { key: 'email', header: 'Email', width: 300},
+        { key: 'sex', header: 'Sex', width: 100 }
+    ]}
+    pageSize={10}
+    rowHeight={30}  // not required, default is 20
+    height={300} // not required, default is 300
 />
 ```
 ### Supported Features
 #### 1. Searching:  
 
-To search, type text into the search input box. The data grid will filter the rows based on the input value.
+To search, type text into the search input box. The data grid will filter the rows based on the input value. And it will reset page to 1.
 
 #### 2. Sorting:  
 
-To sort, click on the column header. The data grid will sort the rows based on the selected column. Clicking again will toggle between ascending and descending order.
+To sort, click on the column header. The data grid will sort the rows based on the selected column. Clicking again will toggle between ascending and descending order. And it will reset page to 1.
 
-#### 3. Virtual Scrolling: 
+#### 3. Pagination:  
+Clicking the pagination will go to the first item of the current page.
+
+#### 4. Virtual Scrolling: 
 
 Virtual scrolling is enabled by default. The data grid efficiently renders only the rows that are visible in the viewport, improving performance for large datasets. 
 

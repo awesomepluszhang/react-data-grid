@@ -3,6 +3,7 @@ import { DataGrid } from './components';
 import { User, loadUsers } from './services';
 
 function App() {
+  console.log(loadUsers(3), 'afeuhf ')
   return (
     <div className="App">
       <h1>Data Grid Example</h1>
@@ -14,7 +15,7 @@ function App() {
             { key: 'email', header: 'Email', width: 300},
             { key: 'sex', header: 'Sex', width: 100 }
           ]}
-          height={30}
+          height={300}
           pageSize={10}
         />
         {/* <StressTest /> */}

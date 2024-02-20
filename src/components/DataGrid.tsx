@@ -5,17 +5,21 @@ import styled from 'styled-components';
 import { Pagination } from './Pagination';
 
 const DEFAULT_ROW_HEIGHT = 20;
+const DEFAULT_CONTAINER_HEIGHT = 300;
+const DEFAULT_COLUMN_WIDTH = 100;
+
 interface Column<T> {
   key: keyof T;
   header: string;
-  width: number;
+  width?: number;
 }
 
 interface DataGridProps<T> {
   data: T[];
   columns: Column<T>[];
   pageSize: number;
-  height: number;
+  rowHeight?: number;
+  height?: number;
 }
 
 type Direction = 'asc' | 'desc';
@@ -40,7 +44,7 @@ const StyledPagination = styled(Pagination)`
 
 export const genericMemo: <C>(c: C) => C = memo;
 
-export const DataGrid = genericMemo(<T extends Record<string, any>>({ data, columns, height, pageSize }: DataGridProps<T>) => {
+export const DataGrid = genericMemo(<T extends Record<string, any>>({ data, columns, pageSize, rowHeight = DEFAULT_ROW_HEIGHT, height = DEFAULT_CONTAINER_HEIGHT }: DataGridProps<T>) => {
   const [filteredData, setFilteredData] = useState<T[]>(data);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: Direction } | null>(null);
@@ -51,8 +55,13 @@ export const DataGrid = genericMemo(<T extends Record<string, any>>({ data, colu
     const filtered = data.filter(item =>
       Object.values(item).some(val => String(val).toLowerCase().includes(value))
     );
-    setFilteredData(filtered);
-  }, [data])
+    setCurrentPage(1);
+    if (sortConfig) {
+      setFilteredData(orderBy(filtered, [sortConfig?.key], [sortConfig?.direction]))
+    } else {
+      setFilteredData(filtered)
+    }
+  }, [data, sortConfig])
 
   const handleSort = useCallback((key: keyof T) => {
     let direction: Direction;
@@ -61,6 +70,7 @@ export const DataGrid = genericMemo(<T extends Record<string, any>>({ data, colu
     } else {
       direction = 'asc';
     }
+    setCurrentPage(1);
     setSortConfig({ key: key, direction });
     setFilteredData(orderBy(filteredData, [key], [direction]))
   }, [filteredData, sortConfig]);
@@ -95,11 +105,11 @@ export const DataGrid = genericMemo(<T extends Record<string, any>>({ data, colu
       <StyledVariableSizeGrid
         ref={gridRef}
         columnCount={columns.length}
-        columnWidth={(index: number) => columns[index].width}
+        columnWidth={(index: number) => columns[index].width ?? DEFAULT_COLUMN_WIDTH}
         rowCount={filteredData.length}
-        rowHeight={(index: number) => DEFAULT_ROW_HEIGHT}
-        width={columns.reduce((sum, col) => sum + (col.width ?? 100), 0)}
-        height={300}
+        rowHeight={(index: number) => rowHeight}
+        width={columns.reduce((sum, col) => sum + (col.width ?? DEFAULT_COLUMN_WIDTH), 0)}
+        height={height}
       >
         {cellRenderer}
       </StyledVariableSizeGrid>

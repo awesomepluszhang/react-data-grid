@@ -14,8 +14,10 @@ const StressTest = () => {
 
       // Simulate rapid updates (sorting, filtering)
       const newData = loadUsers();
-      const filteredAndSortedData = orderBy(newData, ['userId'], ['asc']).filter(item => Object.values(item).some(val => String(val).toLowerCase().includes('s')));
-      
+      const filteredAndSortedData = orderBy(newData, ['userId'], ['asc']).filter(item =>
+        Object.values(item).some(val => String(val).toLowerCase().includes('s'))
+      );
+
       const endTime = performance.now();
       const timeElapsed = endTime - startTime;
       setElapsedTime(prevElapsedTime => prevElapsedTime + timeElapsed);
@@ -34,10 +36,10 @@ const StressTest = () => {
       <DataGrid<User>
         data={data}
         columns={[
-            { key: 'userId', header: 'User Id', width: 100}, 
-            { key: 'username', header: 'Username', width: 300}, 
-            { key: 'email', header: 'Email', width: 300},
-            { key: 'sex', header: 'Sex', width: 100 }
+          { key: 'userId', header: 'User Id', width: 100 },
+          { key: 'username', header: 'Username', width: 300 },
+          { key: 'email', header: 'Email', width: 300 },
+          { key: 'sex', header: 'Sex', width: 100 }
         ]}
         height={30}
         pageSize={10}

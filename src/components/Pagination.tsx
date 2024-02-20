@@ -16,20 +16,20 @@ export type PaginationBaseProps = Omit<HTMLAttributes<HTMLDivElement>, 'onChange
   siblingCount?: number;
 };
 
-const Container = styled.div<{ disabled: boolean; }>`
+const Container = styled.div<{ disabled: boolean }>`
   display: flex;
   align-items: center;
   user-select: none;
   opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
   justify-content: center;
-  color: #2F2F2F;
+  color: #2f2f2f;
 `;
 
 const PageControlSvg = styled.svg<{ disabled: boolean }>`
   width: 1em;
   flex: 0 0 1rem;
   height: 1em;
-  stroke: #2F2F2F;
+  stroke: #2f2f2f;
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -48,7 +48,6 @@ const StepItem = styled.span<{ active: boolean }>`
   color: ${({ active }) => (active ? '#FFF8E7' : 'inherit')};
   cursor: pointer;
 `;
-
 
 export const Pagination = memo(
   forwardRef<HTMLDivElement, PaginationBaseProps>((props, ref) => {
@@ -88,37 +87,37 @@ export const Pagination = memo(
     );
 
     const defaultRenderPaginationItems = useCallback(
-        ({ page, total, goto }: { page: number; total: number; goto: (page: number) => void }) => {
-          const ranges = calcRanges({
-            active: page,
-            total,
-            startBoundaryCount,
-            endBoundaryCount,
-            siblingCount,
-          });
+      ({ page, total, goto }: { page: number; total: number; goto: (page: number) => void }) => {
+        const ranges = calcRanges({
+          active: page,
+          total,
+          startBoundaryCount,
+          endBoundaryCount,
+          siblingCount
+        });
 
-          return (
-            <Inline gap="0.5rem">
-              {ranges.slice(0, -1).map((range, index) => (
-                <Inline key={index}>
-                  {range.map(num => (
-                    <StepItem key={num} onClick={() => goto(num)} active={num === page}>
-                      {num}
-                    </StepItem>
-                  ))}
-                  <StepItem active={false}>...</StepItem>
-                </Inline>
-              ))}
-              {last(ranges)?.map(num => (
-                <StepItem key={num} onClick={() => goto(num)} active={num === page}>
-                  {num}
-                </StepItem>
-              ))}
-            </Inline>
-          );
-        },
-        [siblingCount, startBoundaryCount, endBoundaryCount]
-      );
+        return (
+          <Inline gap="0.5rem">
+            {ranges.slice(0, -1).map((range, index) => (
+              <Inline key={index}>
+                {range.map(num => (
+                  <StepItem key={num} onClick={() => goto(num)} active={num === page}>
+                    {num}
+                  </StepItem>
+                ))}
+                <StepItem active={false}>...</StepItem>
+              </Inline>
+            ))}
+            {last(ranges)?.map(num => (
+              <StepItem key={num} onClick={() => goto(num)} active={num === page}>
+                {num}
+              </StepItem>
+            ))}
+          </Inline>
+        );
+      },
+      [siblingCount, startBoundaryCount, endBoundaryCount]
+    );
 
     return (
       <Container ref={ref} disabled={disabled} {...others}>

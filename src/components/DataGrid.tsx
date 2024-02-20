@@ -1,3 +1,4 @@
+import { orderBy } from 'lodash';
 import React, { useState, useCallback, useMemo } from 'react';
 import { VariableSizeGrid } from 'react-window';
 import styled from 'styled-components';
@@ -15,6 +16,8 @@ interface DataGridProps<T> {
   pageSize: number;
 }
 
+type Direction = 'asc' | 'desc';
+
 const StyledVariableSizeGrid = styled(VariableSizeGrid)`
   margin: auto;
 `;
@@ -22,6 +25,7 @@ const StyledVariableSizeGrid = styled(VariableSizeGrid)`
 const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 20, pageSize }: DataGridProps<T>) => {
   const [filteredData, setFilteredData] = useState<T[]>(data);
   const [currentPage, setCurrentPage] = useState(0);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: Direction } | null>(null);
 
   const handleFilter = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toLowerCase();
@@ -30,6 +34,17 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 2
     );
     setFilteredData(filtered);
   }, [data])
+
+  const handleSort = useCallback((key: keyof T) => {
+    let direction: Direction;
+    if (sortConfig && sortConfig.key === key) {
+      direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+      direction = 'asc';
+    }
+    setSortConfig({ key: key, direction });
+    setFilteredData(orderBy(filteredData, [key], [direction]))
+  }, [filteredData, sortConfig]);
 
   const totalRows = useMemo(() => filteredData.length, [filteredData.length]);
   const totalPages = useMemo(() =>  Math.ceil(totalRows / pageSize), [pageSize, totalRows]);
@@ -54,6 +69,13 @@ const DataGrid = <T extends Record<string, any>>({ data, columns, itemHeight = 2
   return (
     <div>
       <input type="text" placeholder="Search..." onChange={handleFilter} />
+      <div>
+        {columns.map(col => (
+          <span key={col.key as string} onClick={() => handleSort(col.key)}>
+            {col.header} {sortConfig && sortConfig.key === col.key && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+          </span>
+        ))}
+      </div>
       <StyledVariableSizeGrid
         columnCount={columns.length}
         columnWidth={(index: number) => columns[index].width ?? 100}
